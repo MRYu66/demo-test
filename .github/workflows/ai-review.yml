@@ -1,0 +1,39 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    
+    # 必须给权限，否则机器人无法在 PR 留言
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # 获取完整 git 历史，方便 AI 看 diff
+
+      - name: Run DeepSeek Code Review
+        uses: anthropic/claude-code-action@v1
+        env:
+          # 🚨 核心配置：把 Claude 的请求劫持到 DeepSeek
+          ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
+          ANTHROPIC_AUTH_TOKEN: ${{ secrets.DEEPSEEK_API_KEY }}
+          # 指定使用便宜好用的模型
+          ANTHROPIC_MODEL: "deepseek-chat"
+          # 限制上下文长度，防止意外扣费
+          CLAUDE_CODE_MAX_CONTEXT_TOKENS: "128000"
+        with:
+          # 告诉机器人要干什么
+          prompt: |
+            请审查当前 PR 的代码改动。
+            如果有安全漏洞、逻辑错误或代码规范问题，请列出具体问题；
+            如果没有问题，请回复 PASS。
+            严禁修改代码，只输出审查意见。
