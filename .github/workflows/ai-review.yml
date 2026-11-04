@@ -21,7 +21,7 @@ jobs:
           fetch-depth: 0 # 获取完整 git 历史，方便 AI 看 diff
 
       - name: Run DeepSeek Code Review
-        uses: anthropic/claude-code-action@v1
+        uses: anthropics/claude-code-action@v1
         env:
           # 🚨 核心配置：把 Claude 的请求劫持到 DeepSeek
           ANTHROPIC_BASE_URL: "https://api.deepseek.com/anthropic"
